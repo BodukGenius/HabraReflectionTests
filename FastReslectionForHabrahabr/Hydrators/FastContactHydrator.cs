@@ -42,7 +42,7 @@ namespace FastReslectionForHabrahabr.Hydrators
         {
         }
 
-        protected override Contact GetContact(PropertyToValueCorrelation[] correlations)
+        protected override Contact GetContact(IReadOnlyList<PropertyToValueCorrelation> correlations)
         {
             var contact = new Contact();
             foreach (var kv in correlations)

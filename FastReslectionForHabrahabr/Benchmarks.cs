@@ -10,15 +10,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace FastReslectionForHabrahabr
 {
     [MemoryDiagnoser]
-    [Orderer(BenchmarkDotNet.Order.SummaryOrderPolicy.FastestToSlowest)]
+    //[Orderer(BenchmarkDotNet.Order.SummaryOrderPolicy.FastestToSlowest)]
     public class Benchmarks
     {
-        [Params(1, 10, 100, 1000)]
-        public int N = 1;
+        
+        private readonly FastContactHydrator _FastContactHydrator = new FastContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
+        private readonly SlowContactHydrator _SlowContactHydrator = new SlowContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
+        private readonly ManualContactHydrator _ManualContactHydrator = new ManualContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
+        private readonly string[] _BenchData = GetBenchData().ToArray();
 
         public static IEnumerable<string> GetBenchData()
         {
@@ -33,86 +37,70 @@ namespace FastReslectionForHabrahabr
             yield return $"Фамилия Имя Отчество:Иванов Иван Иванович{rn}Телефон:+78886543422{rn}Полных лет:22";
         }
 
+
         [Benchmark]
-        public async Task FastHydrationLinq()
+        public void FastHydrationLinq()
         {
-            var parser = new FastContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
+            foreach (var data in _BenchData)
             {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithLinq(parser, data);
-                }
+                HydrateWithLinq(_FastContactHydrator, data);
             }
-        }
-        [Benchmark]
-        public async Task FastHydration()
-        {
-            var parser = new FastContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
-            {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithoutLinq(parser, data);
-                }
-            }
-        }
-        [Benchmark]
-        public async Task SlowHydrationLinq()
-        {
-            var parser = new SlowContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
-            {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithLinq(parser, data);
-                }
-            }
-        }
-        [Benchmark]
-        public async Task SlowHydration()
-        {
-            var parser = new SlowContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
-            {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithoutLinq(parser, data);
-                }
-            }
-        }
-        [Benchmark]
-        public async Task ManualHydrationLinq()
-        {
-            var parser = new ManualContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
-            {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithLinq(parser, data);
-                }
-            }
-        }
-        [Benchmark]
-        public async Task ManualHydration()
-        {
-            var parser = new ManualContactHydrator(new DefaultRawStringParser(), MockHelper.InstanceDb());
-            for (int i = 0; i < N; i++)
-            {
-                foreach (var data in GetBenchData())
-                {
-                    await HydrateWithoutLinq(parser, data);
-                }
-            }
-        }
-        private static async Task HydrateWithoutLinq(IEntityHydrator<Contact> parser, string data)
-        {
-            var contact = await parser.HydrateWithoutLinq(data, CancellationToken.None);
         }
 
-        private static async Task HydrateWithLinq(IEntityHydrator<Contact> parser, string data)
+        [Benchmark]
+        public void FastHydration()
         {
-            var contact = await parser.HydrateWithLinq(data, CancellationToken.None);
+            foreach (var data in _BenchData)
+            {
+                HydrateWithoutLinq(_FastContactHydrator, data);
+            }
+        }
+
+        [Benchmark]
+        public void SlowHydrationLinq()
+        {
+            foreach (var data in _BenchData)
+            {
+                HydrateWithLinq(_SlowContactHydrator, data);
+            }
+        }
+
+        [Benchmark]
+        public void SlowHydration()
+        {
+            foreach (var data in _BenchData)
+            {
+                HydrateWithoutLinq(_SlowContactHydrator, data);
+            }
+        }
+
+        [Benchmark]
+        public void ManualHydrationLinq()
+        {
+            foreach (var data in _BenchData)
+            {
+                HydrateWithLinq(_ManualContactHydrator, data);
+            }
+        }
+
+
+        [Benchmark(Baseline = true)]
+        public void ManualHydration()
+        {
+            foreach (var data in _BenchData)
+            {
+                HydrateWithoutLinq(_ManualContactHydrator, data);
+            }
+        }
+
+        private static void HydrateWithoutLinq(IEntityHydrator<Contact> parser, string data)
+        {
+            var contact = parser.HydrateWithoutLinq(data, CancellationToken.None);
+        }
+
+        private static void HydrateWithLinq(IEntityHydrator<Contact> parser, string data)
+        {
+            var contact = parser.HydrateWithLinq(data, CancellationToken.None);
         }
     }
 }

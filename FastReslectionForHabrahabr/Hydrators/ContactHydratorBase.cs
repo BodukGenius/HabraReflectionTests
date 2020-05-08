@@ -31,13 +31,13 @@ namespace FastReslectionForHabrahabr.Hydrators
             _db = db;
         }
 
-        public async Task<Contact> HydrateWithLinq(string rawData, CancellationToken abort)
-            => GetContact(await GetPropertiesValues(rawData, abort));
+        public Contact HydrateWithLinq(string rawData, CancellationToken abort)
+            => GetContact(GetPropertiesValues(rawData, abort));
 
-        public async Task<Contact> HydrateWithoutLinq(string rawData, CancellationToken abort)
-            => GetContact(await GetPropertiesValuesWithoutLinq(rawData, abort));
+        public Contact HydrateWithoutLinq(string rawData, CancellationToken abort)
+            => GetContact(GetPropertiesValuesWithoutLinq(rawData, abort));
 
-        private async Task<PropertyToValueCorrelation[]> GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
+        private PropertyToValueCorrelation[] GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
         {
             var result = new List<PropertyToValueCorrelation>(10);
             var mailPairs = _normalizer.ParseWithoutLinq(rawData: rawData, pairDelimiter: Environment.NewLine);
@@ -49,7 +49,7 @@ namespace FastReslectionForHabrahabr.Hydrators
 
                 foreach(var pair in mailPairs)
                 {
-                    if (!pair.Key.Equals(item.Key,StringComparison.InvariantCultureIgnoreCase))
+                    if (!pair.Key.Equals(item.Key, StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     result.Add(new PropertyToValueCorrelation {  PropertyName = item.Property, Value = pair.Value});
@@ -60,7 +60,7 @@ namespace FastReslectionForHabrahabr.Hydrators
 
         protected abstract Contact GetContact(PropertyToValueCorrelation[] correlation);
 
-        private async Task<PropertyToValueCorrelation[]> GetPropertiesValues(string rawData, CancellationToken abort)
+        private PropertyToValueCorrelation[] GetPropertiesValues(string rawData, CancellationToken abort)
         {
             var mailPairs = _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine);
             var mapSchemas = 

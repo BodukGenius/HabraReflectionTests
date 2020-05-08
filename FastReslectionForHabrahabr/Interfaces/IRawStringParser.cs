@@ -2,9 +2,11 @@
 
 namespace FastReslectionForHabrahabr.Interfaces
 {
+    using StrKeyValuePair = KeyValuePair<string, string>;
+
     public interface IRawStringParser
     {
-        Dictionary<string, string> ParseWithLinq(string rawData, string keyValueDelimiter = ":", string pairDelimiter = ";");
-        Dictionary<string, string> ParseWithoutLinq(string rawData, string keyValueDelimiter = ":", string pairDelimiter = ";");        
+        IEnumerable<StrKeyValuePair> ParseWithLinq(string rawData, string keyValueDelimiter = ":", string pairDelimiter = ";");
+        IEnumerable<StrKeyValuePair> ParseWithoutLinq(string rawData, string keyValueDelimiter = ":", string pairDelimiter = ";");
     }
 }

@@ -14,16 +14,31 @@ namespace FastReslectionForHabrahabr.Hydrators
 {
     public abstract class ContactHydratorBase : IEntityHydrator<Contact>
     {
-        private readonly IRawStringParser _normalizer;
-        private readonly IStorage _db;
+        private readonly struct MapSchemas
+        {
+            private readonly IReadOnlyDictionary<string, string> _Data;
+            public MapSchemas(IEnumerable<ContactMapSchema> contactMapSchemas, string typeName)
+            {
+                typeName = typeName.ToLowerInvariant();
+                _Data = contactMapSchemas.Where(x => x.EntityName.ToLowerInvariant() == typeName)
+                    .ToDictionary(x => x.Key, x => x.Property, StringComparer.InvariantCultureIgnoreCase);
+            }
+
+            public bool TryGetProperty(string key, out string propertyName) => _Data.TryGetValue(key, out propertyName);
+        }
+
         protected static readonly string _typeName;
-        protected static readonly IEnumerable<ContactMapSchema> _mapSchemas = MockHelper.GetFakeData();
+        private static readonly MapSchemas _mapSchemas;
 
         static ContactHydratorBase()
         {
             var type = typeof(Contact);
             _typeName = type.FullName;
+            _mapSchemas = new MapSchemas(MockHelper.GetFakeData(), _typeName);
         }
+
+        private readonly IRawStringParser _normalizer;
+        private readonly IStorage _db;
 
         public ContactHydratorBase(IRawStringParser normalizer, IStorage db)
         {
@@ -39,22 +54,17 @@ namespace FastReslectionForHabrahabr.Hydrators
 
         private PropertyToValueCorrelation[] GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
         {
-            var result = new List<PropertyToValueCorrelation>(10);
-            var mailPairs = _normalizer.ParseWithoutLinq(rawData: rawData, pairDelimiter: Environment.NewLine);
-            var mapSchemas = _mapSchemas.ToArray();
-            foreach (var item in mapSchemas)
+            var result = new List<PropertyToValueCorrelation>();
+            foreach(var mp in _normalizer.ParseWithoutLinq(rawData: rawData, pairDelimiter: Environment.NewLine))
             {
-                if (!item.EntityName.Equals(_typeName, StringComparison.InvariantCultureIgnoreCase))
-                    continue;
-
-                foreach(var pair in mailPairs)
-                {
-                    if (!pair.Key.Equals(item.Key, StringComparison.InvariantCultureIgnoreCase))
-                        continue;
-
-                    result.Add(new PropertyToValueCorrelation {  PropertyName = item.Property, Value = pair.Value});
-                }
+                if (_mapSchemas.TryGetProperty(mp.Key, out var propertyName))
+                    result.Add(new PropertyToValueCorrelation
+                    {
+                        PropertyName = propertyName,
+                        Value = mp.Value
+                    });
             }
+
             return result.ToArray();
         }
 
@@ -62,17 +72,8 @@ namespace FastReslectionForHabrahabr.Hydrators
 
         private PropertyToValueCorrelation[] GetPropertiesValues(string rawData, CancellationToken abort)
         {
-            var mailPairs = _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine);
-            var mapSchemas = 
-                _mapSchemas
-                .Where(x => x.EntityName.ToUpperInvariant() == _typeName.ToUpperInvariant())
-                .Select(x => new { x.Key, x.Property })
-                .ToArray();
-
-            return
-                mailPairs
-                .Join(mapSchemas, x => x.Key, x => x.Key, 
-                    (x, y) => new PropertyToValueCorrelation { PropertyName = y.Property, Value = x.Value })
+            return _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine)
+                .Select(x => _mapSchemas.TryGetProperty(x.Key, out var propetyName) ? new PropertyToValueCorrelation { PropertyName = propetyName, Value = x.Value } : null)
                 .ToArray();
         }
     }

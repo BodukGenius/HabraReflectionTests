@@ -16,7 +16,7 @@ namespace FastReslectionForHabrahabr.Hydrators
     {
         private readonly struct MapSchemas
         {
-            private readonly IReadOnlyDictionary<string, string> _Data;
+            private readonly Dictionary<string, string> _Data;
             public MapSchemas(IEnumerable<ContactMapSchema> contactMapSchemas, string typeName)
             {
                 typeName = typeName.ToLowerInvariant();
@@ -52,7 +52,9 @@ namespace FastReslectionForHabrahabr.Hydrators
         public Contact HydrateWithoutLinq(string rawData, CancellationToken abort)
             => GetContact(GetPropertiesValuesWithoutLinq(rawData, abort));
 
-        private PropertyToValueCorrelation[] GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
+        protected abstract Contact GetContact(IReadOnlyList<PropertyToValueCorrelation> correlation);
+
+        private IReadOnlyList<PropertyToValueCorrelation> GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
         {
             var result = new List<PropertyToValueCorrelation>();
             foreach(var mp in _normalizer.ParseWithoutLinq(rawData: rawData, pairDelimiter: Environment.NewLine))
@@ -65,16 +67,14 @@ namespace FastReslectionForHabrahabr.Hydrators
                     });
             }
 
-            return result.ToArray();
+            return result;
         }
 
-        protected abstract Contact GetContact(PropertyToValueCorrelation[] correlation);
-
-        private PropertyToValueCorrelation[] GetPropertiesValues(string rawData, CancellationToken abort)
+        private IReadOnlyList<PropertyToValueCorrelation> GetPropertiesValues(string rawData, CancellationToken abort)
         {
             return _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine)
                 .Select(x => _mapSchemas.TryGetProperty(x.Key, out var propetyName) ? new PropertyToValueCorrelation { PropertyName = propetyName, Value = x.Value } : null)
-                .ToArray();
+                .ToList();
         }
     }
 }

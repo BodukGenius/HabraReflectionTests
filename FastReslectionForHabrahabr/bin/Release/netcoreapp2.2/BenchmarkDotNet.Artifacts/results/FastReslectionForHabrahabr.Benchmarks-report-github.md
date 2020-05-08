@@ -8,11 +8,11 @@ Intel Core i5-6440HQ CPU 2.60GHz (Skylake), 1 CPU, 4 logical and 4 physical core
 
 
 ```
-|              Method |     Mean |    Error |   StdDev | Ratio | RatioSD |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|-------------------- |---------:|---------:|---------:|------:|--------:|-------:|------:|------:|----------:|
-|   FastHydrationLinq | 23.09 μs | 0.169 μs | 0.158 μs |  1.19 |    0.02 | 3.8452 |     - |     - |  11.84 KB |
-|       FastHydration | 22.34 μs | 0.442 μs | 0.726 μs |  1.15 |    0.04 | 3.1738 |     - |     - |   9.78 KB |
-|   SlowHydrationLinq | 30.38 μs | 0.347 μs | 0.324 μs |  1.57 |    0.02 | 4.3335 |     - |     - |  13.34 KB |
-|       SlowHydration | 25.81 μs | 0.396 μs | 0.370 μs |  1.33 |    0.02 | 3.6621 |     - |     - |  11.28 KB |
-| ManualHydrationLinq | 22.67 μs | 0.355 μs | 0.332 μs |  1.17 |    0.02 | 3.8452 |     - |     - |  11.84 KB |
-|     ManualHydration | 19.37 μs | 0.177 μs | 0.166 μs |  1.00 |    0.00 | 3.1738 |     - |     - |   9.78 KB |
+|              Method |     Mean |    Error |   StdDev | Ratio |  Gen 0 | Gen 1 | Gen 2 | Allocated |
+|-------------------- |---------:|---------:|---------:|------:|-------:|------:|------:|----------:|
+|   FastHydrationLinq | 22.54 μs | 0.171 μs | 0.160 μs |  1.14 | 3.8452 |     - |     - |  11.91 KB |
+|       FastHydration | 19.81 μs | 0.084 μs | 0.066 μs |  1.00 | 3.0518 |     - |     - |   9.47 KB |
+|   SlowHydrationLinq | 29.76 μs | 0.156 μs | 0.146 μs |  1.51 | 4.4556 |     - |     - |  13.72 KB |
+|       SlowHydration | 26.34 μs | 0.202 μs | 0.189 μs |  1.33 | 3.6621 |     - |     - |  11.28 KB |
+| ManualHydrationLinq | 22.75 μs | 0.114 μs | 0.106 μs |  1.15 | 3.9673 |     - |     - |  12.22 KB |
+|     ManualHydration | 19.75 μs | 0.056 μs | 0.052 μs |  1.00 | 3.1738 |     - |     - |   9.78 KB |

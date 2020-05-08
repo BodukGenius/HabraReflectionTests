@@ -16,7 +16,11 @@ namespace FastReslectionForHabrahabr.Services
             private ReferenceEqualityComparer() { }
 
             public string Transform(string propertyName) => string.Intern(propertyName);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Equals(string x, string y) => ReferenceEquals(x, y);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int GetHashCode(string obj) => RuntimeHelpers.GetHashCode(obj);
         }
 

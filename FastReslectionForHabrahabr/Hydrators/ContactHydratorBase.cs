@@ -16,7 +16,7 @@ namespace FastReslectionForHabrahabr.Hydrators
     {
         private readonly struct MapSchemas
         {
-            private readonly IReadOnlyDictionary<string, string> _Data;
+            private readonly Dictionary<string, string> _Data;
             public MapSchemas(IEnumerable<ContactMapSchema> contactMapSchemas, string typeName)
             {
                 typeName = typeName.ToLowerInvariant();

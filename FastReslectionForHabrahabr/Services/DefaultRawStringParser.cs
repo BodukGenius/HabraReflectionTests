@@ -15,6 +15,7 @@ namespace FastReslectionForHabrahabr.Services
             => rawData?.Split(pairDelimiter)
             .Select(x => x.Split(keyValueDelimiter, StringSplitOptions.RemoveEmptyEntries))
             .Select(x => x.Length == 2 ? new StrKeyValuePair(key : x[0].Trim(), value: x[1].Trim()) : new StrKeyValuePair(key: _unrecognizedKey, value : x[0].Trim()))
+            .ToList()
             ?? Enumerable.Empty<StrKeyValuePair>();
 
         public IEnumerable<StrKeyValuePair> ParseWithoutLinq(string rawData, string keyValueDelimiter = ":", string pairDelimiter = ";")

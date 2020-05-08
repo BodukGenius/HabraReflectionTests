@@ -13,13 +13,8 @@ namespace FastReslectionForHabrahabr.Hydrators
 {
     public class ManualContactHydrator : ContactHydratorBase
     {
-        protected static readonly PropertyInfo[] _properties;
-        static ManualContactHydrator()
-        {
-            var type = typeof(Contact);
-            _properties = type.GetProperties();
-        }
-        public ManualContactHydrator(IRawStringParser normalizer, IStorage db) : base(normalizer, db)
+        public ManualContactHydrator(IRawStringParser normalizer, IStorage db) 
+            : base(normalizer, db)
         {
         }
 

@@ -20,8 +20,10 @@ namespace FastReslectionForHabrahabr.Hydrators
             public MapSchemas(IEnumerable<ContactMapSchema> contactMapSchemas, string typeName)
             {
                 typeName = typeName.ToLowerInvariant();
+                var comparer = Services.PropertyNameEqualityComparerHolder.Instance;
+
                 _Data = contactMapSchemas.Where(x => x.EntityName.ToLowerInvariant() == typeName)
-                    .ToDictionary(x => x.Key, x => x.Property, StringComparer.InvariantCultureIgnoreCase);
+                    .ToDictionary(x => x.Key, x => comparer.Transform(x.Property), StringComparer.InvariantCultureIgnoreCase);
             }
 
             public bool TryGetProperty(string key, out string propertyName) => _Data.TryGetValue(key, out propertyName);

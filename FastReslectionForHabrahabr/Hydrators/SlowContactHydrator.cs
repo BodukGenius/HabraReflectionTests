@@ -18,7 +18,8 @@ namespace FastReslectionForHabrahabr.Hydrators
         static SlowContactHydrator()
         {
             var type = typeof(Contact);
-            _properties = type.GetProperties().ToDictionary(x => x.Name);
+            var comparer = Services.PropertyNameEqualityComparerHolder.Instance;
+            _properties = type.GetProperties().ToDictionary(x => comparer.Transform(x.Name), comparer);
         }
 
         public SlowContactHydrator(IRawStringParser normalizer, IStorage db) : base(normalizer, db)

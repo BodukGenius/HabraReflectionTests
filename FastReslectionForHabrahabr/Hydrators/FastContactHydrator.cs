@@ -18,11 +18,13 @@ namespace FastReslectionForHabrahabr.Hydrators
         {
             var type = typeof(Contact);
             var properties = type.GetProperties();
-            _propertySettersMap = new Dictionary<string, Action<Contact, string>>(properties.Length);
+            var comparer = Services.PropertyNameEqualityComparerHolder.Instance;
+            _propertySettersMap = new Dictionary<string, Action<Contact, string>>(properties.Length, comparer);
 
             foreach (var property in properties)
             {
-                _propertySettersMap.Add(property.Name, GetSetterAction(property));
+                var propertyName = comparer.Transform(property.Name);
+                _propertySettersMap.Add(propertyName, GetSetterAction(property));
             }
         }
 

@@ -39,68 +39,68 @@ namespace FastReslectionForHabrahabr
 
 
         [Benchmark]
-        public void FastHydrationLinq()
+        public async Task FastHydrationLinq()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithLinq(_FastContactHydrator, data);
+                await HydrateWithLinq(_FastContactHydrator, data);
             }
         }
 
         [Benchmark]
-        public void FastHydration()
+        public async Task FastHydration()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithoutLinq(_FastContactHydrator, data);
+                await HydrateWithoutLinq(_FastContactHydrator, data);
             }
         }
 
         [Benchmark]
-        public void SlowHydrationLinq()
+        public async Task SlowHydrationLinq()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithLinq(_SlowContactHydrator, data);
+                await HydrateWithLinq(_SlowContactHydrator, data);
             }
         }
 
         [Benchmark]
-        public void SlowHydration()
+        public async Task SlowHydration()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithoutLinq(_SlowContactHydrator, data);
+                await HydrateWithoutLinq(_SlowContactHydrator, data);
             }
         }
 
         [Benchmark]
-        public void ManualHydrationLinq()
+        public async Task ManualHydrationLinq()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithLinq(_ManualContactHydrator, data);
+                await HydrateWithLinq(_ManualContactHydrator, data);
             }
         }
 
 
         [Benchmark(Baseline = true)]
-        public void ManualHydration()
+        public async Task ManualHydration()
         {
             foreach (var data in _BenchData)
             {
-                HydrateWithoutLinq(_ManualContactHydrator, data);
+                await HydrateWithoutLinq(_ManualContactHydrator, data);
             }
         }
 
-        private static void HydrateWithoutLinq(IEntityHydrator<Contact> parser, string data)
+        private static async Task HydrateWithoutLinq(IEntityHydrator<Contact> parser, string data)
         {
-            var contact = parser.HydrateWithoutLinq(data, CancellationToken.None);
+            var contact = await parser.HydrateWithoutLinq(data, CancellationToken.None);
         }
 
-        private static void HydrateWithLinq(IEntityHydrator<Contact> parser, string data)
+        private static async Task HydrateWithLinq(IEntityHydrator<Contact> parser, string data)
         {
-            var contact = parser.HydrateWithLinq(data, CancellationToken.None);
+            var contact = await parser.HydrateWithLinq(data, CancellationToken.None);
         }
     }
 }

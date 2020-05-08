@@ -9,7 +9,7 @@ namespace FastReslectionForHabrahabr.Interfaces
 {
     public interface IEntityHydrator<TEntity> where TEntity : class
     {
-        Contact HydrateWithLinq(string rawData, CancellationToken abort);
-        Contact HydrateWithoutLinq(string rawData, CancellationToken abort);
+        Task<Contact> HydrateWithLinq(string rawData, CancellationToken abort);
+        Task<Contact> HydrateWithoutLinq(string rawData, CancellationToken abort);
     }
 }

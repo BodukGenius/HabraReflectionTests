@@ -48,15 +48,15 @@ namespace FastReslectionForHabrahabr.Hydrators
             _db = db;
         }
 
-        public Contact HydrateWithLinq(string rawData, CancellationToken abort)
-            => GetContact(GetPropertiesValues(rawData, abort));
+        public async Task<Contact> HydrateWithLinq(string rawData, CancellationToken abort)
+            => GetContact(await GetPropertiesValues(rawData, abort));
 
-        public Contact HydrateWithoutLinq(string rawData, CancellationToken abort)
-            => GetContact(GetPropertiesValuesWithoutLinq(rawData, abort));
+        public async Task<Contact> HydrateWithoutLinq(string rawData, CancellationToken abort)
+            => GetContact(await GetPropertiesValuesWithoutLinq(rawData, abort));
 
         protected abstract Contact GetContact(IReadOnlyList<PropertyToValueCorrelation> correlation);
 
-        private IReadOnlyList<PropertyToValueCorrelation> GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
+        private Task<IReadOnlyList<PropertyToValueCorrelation>> GetPropertiesValuesWithoutLinq(string rawData, CancellationToken abort)
         {
             var result = new List<PropertyToValueCorrelation>();
             foreach(var mp in _normalizer.ParseWithoutLinq(rawData: rawData, pairDelimiter: Environment.NewLine))
@@ -69,14 +69,15 @@ namespace FastReslectionForHabrahabr.Hydrators
                     });
             }
 
-            return result;
+            return Task.FromResult((IReadOnlyList<PropertyToValueCorrelation>)result);
         }
 
-        private IReadOnlyList<PropertyToValueCorrelation> GetPropertiesValues(string rawData, CancellationToken abort)
+        private Task<IReadOnlyList<PropertyToValueCorrelation>> GetPropertiesValues(string rawData, CancellationToken abort)
         {
-            return _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine)
+            IReadOnlyList<PropertyToValueCorrelation> result = _normalizer.ParseWithLinq(rawData: rawData, pairDelimiter: Environment.NewLine)
                 .Select(x => _mapSchemas.TryGetProperty(x.Key, out var propetyName) ? new PropertyToValueCorrelation { PropertyName = propetyName, Value = x.Value } : null)
                 .ToList();
+            return Task.FromResult(result);
         }
     }
 }

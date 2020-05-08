@@ -12,14 +12,17 @@ namespace FastReslectionForHabrahabr.Hydrators
 {
     public class FastContactHydrator : ContactHydratorBase
     {
-        private static readonly ConcurrentDictionary<string, Action<Contact, string>> _proprtySettersMap = 
-            new ConcurrentDictionary<string, Action<Contact, string>>();
+        private static readonly Dictionary<string, Action<Contact, string>> _propertySettersMap;
+
         static FastContactHydrator()
         {
             var type = typeof(Contact);
-            foreach (var property in type.GetProperties())
+            var properties = type.GetProperties();
+            _propertySettersMap = new Dictionary<string, Action<Contact, string>>(properties.Length);
+
+            foreach (var property in properties)
             {
-                _proprtySettersMap[property.Name] = GetSetterAction(property);
+                _propertySettersMap.Add(property.Name, GetSetterAction(property));
             }
         }
 
@@ -42,10 +45,10 @@ namespace FastReslectionForHabrahabr.Hydrators
         protected override Contact GetContact(PropertyToValueCorrelation[] correlations)
         {
             var contact = new Contact();
-            foreach (var setterMapItem in _proprtySettersMap)
+            foreach (var kv in correlations)
             {
-                var correlation = correlations.FirstOrDefault(x => x.PropertyName == setterMapItem.Key);
-                setterMapItem.Value(contact, correlation?.Value);
+                if (_propertySettersMap.TryGetValue(kv.PropertyName, out var setter))
+                    setter(contact, kv.Value);
             }
             return contact;
         }

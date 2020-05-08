@@ -13,12 +13,14 @@ namespace FastReslectionForHabrahabr.Hydrators
 {
     public class SlowContactHydrator : ContactHydratorBase
     {
-        protected static readonly PropertyInfo[] _properties;
+        private static readonly Dictionary<string, PropertyInfo> _properties;
+
         static SlowContactHydrator()
         {
             var type = typeof(Contact);
-            _properties = type.GetProperties();
+            _properties = type.GetProperties().ToDictionary(x => x.Name);
         }
+
         public SlowContactHydrator(IRawStringParser normalizer, IStorage db) : base(normalizer, db)
         {
         }
@@ -26,13 +28,10 @@ namespace FastReslectionForHabrahabr.Hydrators
         protected override Contact GetContact(PropertyToValueCorrelation[] correlations)
         {
             var contact = new Contact();
-            foreach (var property in _properties)
+            foreach (var kv in correlations)
             {
-                var correlation = correlations.FirstOrDefault(x => x.PropertyName == property.Name);
-                if (correlation?.Value == null)
-                    continue;
-
-                property.SetValue(contact, correlation.Value);
+                if (_properties.TryGetValue(kv.PropertyName, out var property))
+                    property.SetValue(contact, kv.Value);
             }
             return contact;
         }
